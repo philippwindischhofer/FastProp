@@ -9,6 +9,8 @@ from Profiler import Profiler
 from ProfilePlotter import ProfilePlotter
 from Histogram import Histogram
 from HistogramPlotter import HistogramPlotter
+from Propagator import Propagator
+from HistogramReweighter import HistogramReweighter
 
 def main():
 
@@ -36,11 +38,16 @@ def main():
     out = ana.run(dummy_data)
     out_t = ana_t.run(dummy_data)
 
-    # compare their resulting distributions
+    # compute their resulting distributions
     binning = np.linspace(0, 10, 10)
-    hist = Histogram("ana", out, binning)
-    hist_t = Histogram("ana_t", out_t, binning)
-    HistogramPlotter.plot_histograms([hist, hist_t], outfile = "/home/philipp/OX/thesis/FastProp/run/overview.pdf")
+    hist = Histogram.from_data(name = "ana", data = out, binning = binning)
+    hist_t = Histogram.from_data(name = "ana_t", data = out_t, binning = binning)
+
+    # also get the weights
+    prop = Propagator()
+    hist_rw = HistogramReweighter.reweight_to(hist, prop)
+    
+    HistogramPlotter.plot_histograms([hist, hist_t, hist_rw], outfile = "/home/philipp/OX/thesis/FastProp/run/overview.pdf")
 
     # create a profiler for this analysis ...
     prof = Profiler(ana)
