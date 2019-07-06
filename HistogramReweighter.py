@@ -12,7 +12,8 @@ class HistogramReweighter:
         bin_contents = hist.bin_contents
 
         # evaluate the reweighting factor
-        reweighting = reweighter.evaluate(bin_centers)
+        reweighting_input = np.expand_dims(bin_centers, axis = 1)
+        reweighting = reweighter.predict(reweighting_input)
 
         # generate the new histogram
         retval = Histogram.from_bins(name = hist.name + "_reweighted", bin_contents = bin_contents * reweighting, bin_edges = bin_edges)

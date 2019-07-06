@@ -7,4 +7,4 @@ class DummyMorphism(Morphism):
 
     def apply(self, data):
         print("this is morphism '{}'".format(self.name))
-        return data + 1 # do nothing to the data
+        return data # do nothing to the data

@@ -11,6 +11,7 @@ from Histogram import Histogram
 from HistogramPlotter import HistogramPlotter
 from Propagator import Propagator
 from HistogramReweighter import HistogramReweighter
+from HistogramLREstimator import HistogramLREstimator
 
 def main():
 
@@ -20,7 +21,7 @@ def main():
 
     m0 = DummyMorphism("m0") # always put a dummy morphism at the beginning
     m1 = ExpGeneratorMorphism("m1", pars = {"scale": 1.0})
-    m2 = ConvMorphism("m2", pars = {"loc": 1.0, "scale": 0.5})
+    m2 = ConvMorphism("m2", pars = {"loc": 1.0, "scale": 1.6})
     m3 = DummyMorphism("m3")
     m4 = DummyMorphism("m4")
     m5 = DummyMorphism("m5")
@@ -31,29 +32,38 @@ def main():
     ana.add_morphisms([m0, m1, m2, m3, m4, m5])
     ana_t.add_morphisms([m0, m1_t, m2, m3, m4, m5])
 
-    nsamp = 1000
+    nsamp = 1000000
     dummy_data = pd.DataFrame.from_dict({"datacol": np.random.rand(nsamp)})
-
+    
     # run both analyses on the same data
     out = ana.run(dummy_data)
     out_t = ana_t.run(dummy_data)
 
-    # compute their resulting distributions
-    binning = np.linspace(0, 10, 10)
+    # compute the resulting distributions
+    binning = np.linspace(-2, 10, 30)
     hist = Histogram.from_data(name = "ana", data = out, binning = binning)
     hist_t = Histogram.from_data(name = "ana_t", data = out_t, binning = binning)
 
-    # also get the weights
-    prop = Propagator()
-    hist_rw = HistogramReweighter.reweight_to(hist, prop)
+    # play a bit with the likelihood ratio that should be propagated
+    source_hist = Histogram.from_data("m1", data = m1(dummy_data), binning = binning)
+    source_hist_t = Histogram.from_data("m1_t", data = m1_t(dummy_data), binning = binning)
+    HistogramPlotter.plot_histograms([source_hist, source_hist_t], outfile = "/home/philipp/OX/thesis/FastProp/run/source.pdf")
     
-    HistogramPlotter.plot_histograms([hist, hist_t, hist_rw], outfile = "/home/philipp/OX/thesis/FastProp/run/overview.pdf")
-
-    # create a profiler for this analysis ...
+    # also get the weights and compare the result
+    # first, create the profile of this analysis
     prof = Profiler(ana)
-
-    # ... and create its profile based on some dummy data
     prof.profile(dummy_data)
+    
+    est = HistogramLREstimator(nbins = 30)
+    est.build_estimate(data_num = m1_t(dummy_data), data_den = m1(dummy_data))
+    
+    prop = Propagator("prop")
+    prop.generate_propagator("m1", "m5", prof, est)
+    hist_rw = HistogramReweighter.reweight_to(hist, prop)
+
+    HistogramPlotter.plot_histograms([hist, hist_t, hist_rw], outfile = "/home/philipp/OX/thesis/FastProp/run/target_rw.pdf")
+
+    HistogramPlotter.plot_histograms([hist, hist_t], outfile = "/home/philipp/OX/thesis/FastProp/run/target.pdf")
 
     # look what's inside
     ProfilePlotter.plot(prof, outdir = "/home/philipp/OX/thesis/FastProp/run")
