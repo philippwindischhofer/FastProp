@@ -10,7 +10,7 @@ class Propagator(TFEnvironment):
         super(Propagator, self).__init__()
         self.name = name
 
-    def generate_propagator(self, from_morphism, to_morphism, analysis_profile, est, num_batches = 16000, batchsize = 500, debug = False):
+    def generate_propagator(self, from_morphism, to_morphism, analysis_profile, est, num_batches = 40000, batchsize = 300, debug = False):
         """
         Builds the propagator, i.e. trains the neural network to compute the reweighting factors.
         """
@@ -42,12 +42,12 @@ class Propagator(TFEnvironment):
             
             self.train_step(to_morphism_data_step, densrat_source_step)
 
-            if not batch % 100:
+            if not batch % 1000:
                 print("regression loss = {}".format(self.evaluate_regression_loss(to_morphism_data_step, densrat_source_step)))
         
     def build(self):
 
-        self.reg = SimpleRegressor(self.name + "_reg", hyperpars = {"num_layers": 3, "num_units": 30})
+        self.reg = SimpleRegressor(self.name + "_reg", hyperpars = {"num_layers": 2, "num_units": 30})
         
         with self.graph.as_default():
             # only need the final variables, as well as the initial likelihood ratio (evaluated at the corresponding inputs) as inputs

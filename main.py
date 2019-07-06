@@ -5,6 +5,7 @@ from Analysis import Analysis
 from DummyMorphism import DummyMorphism
 from ConvMorphism import ConvMorphism
 from ExpGeneratorMorphism import ExpGeneratorMorphism
+from TransfMorphism import TransfMorphism
 from Profiler import Profiler
 from ProfilePlotter import ProfilePlotter
 from Histogram import Histogram
@@ -21,13 +22,13 @@ def main():
 
     m0 = DummyMorphism("m0") # always put a dummy morphism at the beginning
     m1 = ExpGeneratorMorphism("m1", pars = {"scale": 1.0})
-    m2 = ConvMorphism("m2", pars = {"loc": 1.0, "scale": 1.6})
-    m3 = DummyMorphism("m3")
+    m2 = ConvMorphism("m2", pars = {"loc": 1.0, "scale": 1.6}, kern = np.random.normal)
+    m3 = TransfMorphism("m3", transf = lambda x: x - 0.05 * x**2 + 0.01 * x**3)
     m4 = DummyMorphism("m4")
     m5 = DummyMorphism("m5")
 
     # this is the modified morphism
-    m1_t = ExpGeneratorMorphism("m1_t", pars = {"scale": 1.5})
+    m1_t = ExpGeneratorMorphism("m1_t", pars = {"scale": 2.0})
     
     ana.add_morphisms([m0, m1, m2, m3, m4, m5])
     ana_t.add_morphisms([m0, m1_t, m2, m3, m4, m5])
@@ -40,7 +41,7 @@ def main():
     out_t = ana_t.run(dummy_data)
 
     # compute the resulting distributions
-    binning = np.linspace(-2, 10, 30)
+    binning = np.linspace(-2, 20, 30)
     hist = Histogram.from_data(name = "ana", data = out, binning = binning)
     hist_t = Histogram.from_data(name = "ana_t", data = out_t, binning = binning)
 
