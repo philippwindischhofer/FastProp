@@ -61,8 +61,8 @@ class Propagator(TFEnvironment):
 
             # set up the optimizer
             self.opt = tf.train.AdamOptimizer(learning_rate = 1e-4,
-                                              beta1 = 0.9,
-                                              beta2 = 0.999,
+                                              beta1 = 0.5,
+                                              beta2 = 0.3,
                                               epsilon = 1e-6)
             
             self.train_regressor = self.opt.minimize(self.regression_loss, var_list = self.reg_vars)

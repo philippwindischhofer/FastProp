@@ -62,9 +62,8 @@ def main():
     prop.generate_propagator("m1", "m5", prof, est)
     hist_rw = HistogramReweighter.reweight_to(hist, prop)
 
-    HistogramPlotter.plot_histograms([hist, hist_t, hist_rw], outfile = "/home/philipp/OX/thesis/FastProp/run/target_rw.pdf")
-
-    HistogramPlotter.plot_histograms([hist, hist_t], outfile = "/home/philipp/OX/thesis/FastProp/run/target.pdf")
+    HistogramPlotter.plot_histograms([hist, hist_t, hist_rw], show_ratio = True, ratio_reference = hist_t, outfile = "/home/philipp/OX/thesis/FastProp/run/target_rw.pdf")
+    HistogramPlotter.plot_histograms([hist, hist_t], show_ratio = True, ratio_reference = hist_t, outfile = "/home/philipp/OX/thesis/FastProp/run/target.pdf")
 
     # look what's inside
     ProfilePlotter.plot(prof, outdir = "/home/philipp/OX/thesis/FastProp/run")
