@@ -13,6 +13,7 @@ from HistogramPlotter import HistogramPlotter
 from Propagator import Propagator
 from HistogramReweighter import HistogramReweighter
 from HistogramLREstimator import HistogramLREstimator
+from FunctionPlotter import FunctionPlotter
 
 def main():
 
@@ -42,13 +43,13 @@ def main():
 
     # compute the resulting distributions
     binning = np.linspace(-2, 20, 30)
-    hist = Histogram.from_data(name = "ana", data = out, binning = binning)
-    hist_t = Histogram.from_data(name = "ana_t", data = out_t, binning = binning)
+    hist = Histogram.from_data(name = r'$p(x_3|\theta)$', data = out, binning = binning)
+    hist_t = Histogram.from_data(name = r'$p(x_3|\tilde{\theta})$', data = out_t, binning = binning)
 
     # play a bit with the likelihood ratio that should be propagated
-    source_hist = Histogram.from_data("m1", data = m1(dummy_data), binning = binning)
-    source_hist_t = Histogram.from_data("m1_t", data = m1_t(dummy_data), binning = binning)
-    HistogramPlotter.plot_histograms([source_hist, source_hist_t], outfile = "/home/philipp/OX/thesis/FastProp/run/source.pdf")
+    source_hist = Histogram.from_data(r'$p(x_1|\theta)$', data = m1(dummy_data), binning = binning)
+    source_hist_t = Histogram.from_data(r'$p(x_1|\tilde{\theta})$', data = m1_t(dummy_data), binning = binning)
+    HistogramPlotter.plot_histograms([source_hist, source_hist_t], color = ["black", "salmon"], outfile = "/home/philipp/OX/thesis/FastProp/run/source.pdf", xlabel = r'x_1', ylabel = "events")
     
     # also get the weights and compare the result
     # first, create the profile of this analysis
@@ -59,14 +60,22 @@ def main():
     est.build_estimate(data_num = m1_t(dummy_data), data_den = m1(dummy_data))
     
     prop = Propagator("prop")
-    prop.generate_propagator("m1", "m5", prof, est)
+    prop.generate_propagator("m1", "m5", prof, est)    
     hist_rw = HistogramReweighter.reweight_to(hist, prop)
+    hist_rw.name = r'$p(x_3|\theta)\cdot R(x_3; \tilde{\theta}, \theta)$'
 
-    HistogramPlotter.plot_histograms([hist, hist_t, hist_rw], show_ratio = True, ratio_reference = hist_t, outfile = "/home/philipp/OX/thesis/FastProp/run/target_rw.pdf")
-    HistogramPlotter.plot_histograms([hist, hist_t], show_ratio = True, ratio_reference = hist_t, outfile = "/home/philipp/OX/thesis/FastProp/run/target.pdf")
+    # plot the final histograms
+    HistogramPlotter.plot_histograms([hist, hist_t, hist_rw], show_ratio = True, color = ["black", "salmon", "mediumseagreen"], ratio_reference = hist_t, xlabel = r'$x_3$', ylabel = "events", outfile = "/home/philipp/OX/thesis/FastProp/run/target_rw.pdf")
+    HistogramPlotter.plot_histograms([hist, hist_t], show_ratio = True, color = ["black", "salmon"], ratio_reference = hist_t, xlabel = r'$x_3$', ylabel = "events", outfile = "/home/philipp/OX/thesis/FastProp/run/target.pdf")
 
-    # look what's inside
-    ProfilePlotter.plot(prof, outdir = "/home/philipp/OX/thesis/FastProp/run")
+    # plot both the original reweighting factor, and the final one
+    finebinning = np.linspace(-2, 10, 300)
+    finebinning = np.expand_dims(finebinning, axis = 1)
+    source_reweighting = est.evaluate(finebinning)
+    target_reweighting = prop.predict(finebinning)
+
+    FunctionPlotter.plot_function(finebinning, source_reweighting, outfile = "/home/philipp/OX/thesis/FastProp/run/source_reweighting.pdf", xlabel = r'$x_1$', ylabel = r'$R(x_1; \tilde{\theta}, \theta)$', color = "black")
+    FunctionPlotter.plot_function(finebinning, target_reweighting, outfile = "/home/philipp/OX/thesis/FastProp/run/target_reweighting.pdf", xlabel = r'$x_3$', ylabel = r'$R(x_3; \tilde{\theta}, \theta)$', color = "black")
 
 if __name__ == "__main__":
     main()

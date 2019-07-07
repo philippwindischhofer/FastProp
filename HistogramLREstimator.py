@@ -26,16 +26,4 @@ class HistogramLREstimator(LREstimator):
         self.density_den = interp1d(self.bin_centers, self.bin_contents_den, kind = "linear", fill_value = "extrapolate")
         
     def evaluate(self, x):
-        # # determine the bin indices corresponding to the values in 'x'
-        # inds = np.digitize(x, self.bin_edges) - 1 # subtract 1 to have index start from zero
-
-        # # ensure correct range
-        # inds = np.clip(inds, 0, len(self.bin_edges) - 2)
-        
-        # # evaluate the numerator and denominator densities and return their ratio
-        # num = self.bin_contents_num[inds]
-        # den = self.bin_contents_den[inds]
-
-        # return num / den
-
         return self.density_num(x) / self.density_den(x)
