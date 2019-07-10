@@ -10,7 +10,7 @@ class Propagator(TFEnvironment):
         super(Propagator, self).__init__()
         self.name = name
 
-    def generate_propagator(self, from_morphism, to_morphism, analysis_profile, est, num_batches = 40000, batchsize = 300, debug = False):
+    def generate_propagator(self, from_morphism, to_morphism, analysis_profile, est, num_batches = 100000, batchsize = 300, debug = False):
         """
         Builds the propagator, i.e. trains the neural network to compute the reweighting factors.
         """
@@ -61,8 +61,8 @@ class Propagator(TFEnvironment):
 
             # set up the optimizer
             self.opt = tf.train.AdamOptimizer(learning_rate = 1e-4,
-                                              beta1 = 0.5,
-                                              beta2 = 0.3,
+                                              beta1 = 0.1,
+                                              beta2 = 0.5,
                                               epsilon = 1e-6)
             
             self.train_regressor = self.opt.minimize(self.regression_loss, var_list = self.reg_vars)

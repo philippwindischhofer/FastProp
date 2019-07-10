@@ -45,7 +45,7 @@ class HistogramPlotter:
         # prepare ratio pane
         if show_ratio:
             reference_bin_contents = ratio_reference.bin_contents
-            rel_bin_contents = [cur_bin_contents / reference_bin_contents for cur_bin_contents in bin_contents]
+            rel_bin_contents = [np.nan_to_num(cur_bin_contents / reference_bin_contents, copy = True) for cur_bin_contents in bin_contents]
             ax_rel.hist(centers, weights = rel_bin_contents, histtype = 'step', stacked = False, fill = False, bins = cur_edges, **kwargs)
 
             # switch off the ticks on the abs pane
